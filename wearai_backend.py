@@ -21,17 +21,19 @@ def tryon():
         request.files['user_image'].save(user_path)
 
     try:
-        output = client.run(
-            "stability-ai/sdxl:5f56db0d0dfb5f1741e5c7cfc7f1d0f8bbebd2f28dfbfb07c354a9cde292bcd2",
+        output_url = client.run(
+            "stability-ai/stable-diffusion-img2img:27b3ac62c86054f60e2e5f1c2a88a7a08991e283ce26b3fc16e2c5bf3b807c2b",
             input={
-    "prompt": "fashion photography, model wearing elegant clothing, full body",
-    "image": open(user_path, "rb")
-}
-
+                "image": open(user_path, "rb"),
+                "prompt": "fashion model wearing elegant clothing, full body, photo",
+                "strength": 0.6,
+                "guidance_scale": 7.5,
+                "num_outputs": 1
+            }
         )
-        return jsonify({ 'result_url': output })
+        return jsonify({'result_url': output_url[0]})
     except Exception as e:
-        return jsonify({ 'error': str(e) }), 500
+        return jsonify({'error': str(e)}), 500
     finally:
         os.remove(user_path)
 
