@@ -1,0 +1,10 @@
+
+services:
+  - type: web
+    name: wearai-backend
+    env: python
+    buildCommand: ""
+    startCommand: python wearai_backend.py
+    envVars:
+      - key: REPLICATE_API_TOKEN
+        sync: false
