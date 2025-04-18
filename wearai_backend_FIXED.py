@@ -1,32 +1,56 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import replicate
 import tempfile
 import os
 
 app = Flask(__name__)
 CORS(app)
 
+# Replicate client
+REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
+client = replicate.Client(api_token=REPLICATE_API_TOKEN)
+
 @app.route("/test", methods=["GET"])
 def test():
-    # Always healthy
-    return jsonify({"ok": True}), 200
+    """Health‑check: verifies your token by listing models."""
+    try:
+        models = client.models.list()
+        return jsonify({"ok": True, "available_models": len(models)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 @app.route("/tryon", methods=["POST"])
 def tryon():
-    """
-    Demo stub: ignores the upload and returns a placeholder image.
-    Swap this URL out later for your real AI-generated image endpoint.
-    """
+    """Runs Stable Diffusion img2img on your uploaded photo."""
     if "user_image" not in request.files:
         return jsonify({"error": "Missing user_image"}), 400
 
-    # (Optionally save it if you want to inspect uploads)
+    # Save upload to temp file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
-        request.files["user_image"].save(tmp.name)
+        tmp_path = tmp.name
+        request.files["user_image"].save(tmp_path)
 
-    # Return a fixed demo image URL
-    placeholder = "https://via.placeholder.com/512x512.png?text=WearAI+Demo"
-    return jsonify({"result_url": placeholder})
+    try:
+        output = client.run(
+            # Replace VERSION_ID with the exact latest on Replicate’s page
+            "stability-ai/stable-diffusion:db21e6c9bfcaf1ddd0c9d4e3a4858be58f13a72688f6242382d8b7391c0b17e4",
+            input={
+                "prompt": "a fashion model wearing a stylish outfit, studio photo",
+                "image": open(tmp_path, "rb"),
+                "strength": 0.7,
+                "guidance_scale": 7.5,
+                "num_outputs": 1
+            }
+        )
+        return jsonify({"result_url": output[0]})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
