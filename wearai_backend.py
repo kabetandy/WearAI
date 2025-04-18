@@ -13,31 +13,26 @@ client = replicate.Client(api_token=REPLICATE_API_TOKEN)
 
 @app.route('/tryon', methods=['POST'])
 def tryon():
-    if 'user_image' not in request.files or 'cloth_image' not in request.files:
-        return jsonify({'error': 'Missing images'}), 400
+    if 'user_image' not in request.files:
+        return jsonify({'error': 'Missing user image'}), 400
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as user_temp:
         user_path = user_temp.name
         request.files['user_image'].save(user_path)
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as cloth_temp:
-        cloth_path = cloth_temp.name
-        request.files['cloth_image'].save(cloth_path)
-
     try:
         output = client.run(
-            "prompthero/openjourney",
-            input={
-                "prompt": "realistic person wearing outfit",
+            "stability-ai/sdxl:5f56db0d0dfb5f1741e5c7cfc7f1d0f8bbebd2f28dfbfb07c354a9cde292bcd2",
+            input={{
+                "prompt": "fashion photography, model wearing elegant clothing, full body",
                 "image": open(user_path, "rb")
-            }
+            }}
         )
-        return jsonify({'result_url': output})
+        return jsonify({ 'result_url': output })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({ 'error': str(e) }), 500
     finally:
         os.remove(user_path)
-        os.remove(cloth_path)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
