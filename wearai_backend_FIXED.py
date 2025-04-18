@@ -28,32 +28,27 @@ def test():
 # ─── Try‑On Endpoint ───────────────────────────────────────────────────────────
 @app.route('/tryon', methods=['POST'])
 def tryon():
-    """
-    Minimal example using the default Stable Diffusion text-to-image model.
-    Expects a 'user_image' file but ignores it for now—just generates a demo image.
-    """
     if 'user_image' not in request.files:
-        return jsonify({"error": "Missing user_image"}), 400
+        return jsonify({'error': 'Missing user_image'}), 400
 
-    # Save the uploaded file (even if we won't use it)
-    user_file = request.files['user_image']
+    # Save the uploaded image to a temp file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
         tmp_path = tmp.name
-        user_file.save(tmp_path)
+        request.files['user_image'].save(tmp_path)
 
     try:
-        # Run a public Stable Diffusion text-to-image demo
-        output = output = client.run(
-    "stability-ai/stable-diffusion:b3d14e1c",
-    input={
-        "prompt": "a fashion model wearing stylish clothes, studio photo",
-        "num_outputs": 1
-    }
-)
-        # `output` is a list of URLs
-        return jsonify({"result_url": output[0]})
+        # Call the free openjourney model
+        output = client.run(
+            "prompthero/openjourney:dbb9d49c279e7ad6550a9d8e6d4c13877b0be67cc2b0d7f6518c3fb42a50f0dd",
+            input={
+                "prompt": "a fashion model wearing a stylish outfit, photo",
+                "image": open(tmp_path, "rb")
+            }
+        )
+        # output is a list of URLs
+        return jsonify({'result_url': output[0]})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({'error': str(e)}), 500
     finally:
         os.remove(tmp_path)
 
