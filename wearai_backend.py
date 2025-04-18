@@ -23,10 +23,11 @@ def tryon():
     try:
         output = client.run(
             "stability-ai/sdxl:5f56db0d0dfb5f1741e5c7cfc7f1d0f8bbebd2f28dfbfb07c354a9cde292bcd2",
-            input={{
-                "prompt": "fashion photography, model wearing elegant clothing, full body",
-                "image": open(user_path, "rb")
-            }}
+            input={
+    "prompt": "fashion photography, model wearing elegant clothing, full body",
+    "image": open(user_path, "rb")
+}
+
         )
         return jsonify({ 'result_url': output })
     except Exception as e:
