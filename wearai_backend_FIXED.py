@@ -32,17 +32,17 @@ def tryon():
         request.files["user_image"].save(tmp_path)
 
     try:
-        output = client.run(
-            # Replace VERSION_ID with the exact latest on Replicate’s page
-            "stability-ai/stable-diffusion:db21e6c9bfcaf1ddd0c9d4e3a4858be58f13a72688f6242382d8b7391c0b17e4",
-            input={
-                "prompt": "a fashion model wearing a stylish outfit, studio photo",
-                "image": open(tmp_path, "rb"),
-                "strength": 0.7,
-                "guidance_scale": 7.5,
-                "num_outputs": 1
-            }
-        )
+       output = client.run(
+    "stability-ai/stable-diffusion:ac732df8",
+    input={
+        "prompt": "a fashion model wearing a stylish outfit, studio photo",
+        "image": open(tmp_path, "rb"),
+        "strength": 0.7,
+        "guidance_scale": 7.5,
+        "num_outputs": 1
+    }
+)
+
         return jsonify({"result_url": output[0]})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
