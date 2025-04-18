@@ -1,10 +1,12 @@
 
 from flask import Flask, request, jsonify
 import replicate
+from flask_cors import CORS
 import tempfile
 import os
 
 app = Flask(__name__)
+CORS(app)
 REPLICATE_API_TOKEN = os.environ["REPLICATE_API_TOKEN"]
 replicate.Client(api_token=REPLICATE_API_TOKEN)
 
