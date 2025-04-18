@@ -44,12 +44,12 @@ def tryon():
     try:
         # Run a public Stable Diffusion text-to-image demo
         output = client.run(
-            "stability-ai/stable-diffusion",
-            input={
-                "prompt": "a fashion model wearing stylish clothes, studio photo",
-                "num_outputs": 1
-            }
-        )
+    "stability-ai/stable-diffusion:b3d14e1c",
+    input={
+        "prompt": "a fashion model wearing stylish clothes, studio photo",
+        "num_outputs": 1
+    }
+)
         # `output` is a list of URLs
         return jsonify({"result_url": output[0]})
     except Exception as e:
