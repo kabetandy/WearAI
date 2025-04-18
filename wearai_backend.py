@@ -21,17 +21,13 @@ def tryon():
         request.files['user_image'].save(user_path)
 
     try:
-        output_url = client.run(
-            "stability-ai/stable-diffusion-img2img:27b3ac62c86054f60e2e5f1c2a88a7a08991e283ce26b3fc16e2c5bf3b807c2b",
+        output = client.run(
+            "cjwbw/vtoonify:b79bfa61c9c1ac0b6c169ef7e9c3d1580fcac5b8f228403dfd73ffb6c22c96e5",
             input={
-                "image": open(user_path, "rb"),
-                "prompt": "fashion model wearing elegant clothing, full body, photo",
-                "strength": 0.6,
-                "guidance_scale": 7.5,
-                "num_outputs": 1
+                "image": open(user_path, "rb")
             }
         )
-        return jsonify({'result_url': output_url[0]})
+        return jsonify({'result_url': output})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
