@@ -16,8 +16,8 @@ client = replicate.Client(api_token=REPLICATE_API_TOKEN)
 @app.route('/test', methods=['GET'])
 def test():
     """
-    Verifies that your API key works by listing available models.
-    Returns {"ok": True, "available_models": N} on success.
+    Verifies your API key by listing available models.
+    Returns {"ok": true, "available_models": N} on success.
     """
     try:
         models = client.models.list()
@@ -29,35 +29,19 @@ def test():
 @app.route('/tryon', methods=['POST'])
 def tryon():
     """
-    Minimal example using the default Stable Diffusion text-to-image model.
-    Expects a 'user_image' file but ignores it for now—just generates a demo image.
+    Runs a Stable Diffusion img2img demo on the uploaded photo.
+    Returns {"result_url": "<generated image URL>"}.
     """
     if 'user_image' not in request.files:
-        return jsonify({"error": "Missing user_image"}), 400
+        return jsonify({'error': 'Missing user_image'}), 400
 
-    # Save the uploaded file (even if we won't use it)
-    user_file = request.files['user_image']
+    # Save the uploaded photo to a temp file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
         tmp_path = tmp.name
-        user_file.save(tmp_path)
+        request.files['user_image'].save(tmp_path)
 
     try:
-        # Run a public Stable Diffusion text-to-image demo
         output = client.run(
-            "stability-ai/stable-diffusion",
+            "stability-ai/stable-diffusion:db21e6c9bfcaf1ddd0c9d4e3a4858be58f13a72688f6242382d8b7391c0b17e4",
             input={
-                "prompt": "a fashion model wearing stylish clothes, studio photo",
-                "num_outputs": 1
-            }
-        )
-        # `output` is a list of URLs
-        return jsonify({"result_url": output[0]})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        os.remove(tmp_path)
-
-# ─── Main Entrypoint ───────────────────────────────────────────────────────────
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+                "prompt": "a fashion model wearing a stylish outfit,
