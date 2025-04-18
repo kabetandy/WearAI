@@ -5,6 +5,16 @@ import replicate
 import tempfile
 import os
 
+@app.route('/test', methods=['GET'])
+def test():
+    try:
+        # Try listing your available models to verify the token
+        models = client.models.list()
+        return jsonify({"ok": True, "available_models": len(models)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 app = Flask(__name__)
 CORS(app)
 
